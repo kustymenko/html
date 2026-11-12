@@ -1,0 +1,820 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>HTML: мозковий штурм</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: одна сцена для проєктора — смуга етапів угорі, код і «вікно браузера» посередині, табло 4 команд унизу. */
+:root {
+  --bg: #eef2f8;
+  --surface: #ffffff;
+  --ink: #0f1e3a;
+  --muted: #55627c;
+  --line: #d3dbe8;
+  --accent: #d9480f;
+  --accent-ink: #ffffff;
+  --flash: #f3c31f;
+  --flash-ink: #2a2000;
+  --good: #17784a;
+  --good-soft: #dcf2e6;
+  --bad: #c0392b;
+  --bad-soft: #fbe3df;
+  --code-bg: #0e1a33;
+  --code-ink: #e7edfb;
+  --code-tag: #ff9f7a;
+  --code-attr: #ffd43b;
+  --code-val: #8fe3a7;
+  --code-com: #8392b3;
+  /* «Вікно браузера» навмисно світле в обох темах: так виглядає сторінка учня */
+  --page-bg: #ffffff;
+  --page-ink: #111111;
+  --page-line: #999999;
+  --page-th: #eeeeee;
+  --chrome: #e4e8ef;
+  --chrome-ink: #5b6475;
+  --t1: #2458a6;
+  --t2: #c47a00;
+  --t3: #17784a;
+  --t4: #b8326b;
+  --font-display: "Unbounded", "Manrope", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-page: "Times New Roman", Times, serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1325; --surface: #121f3a; --ink: #eef2fb; --muted: #9eabc6; --line: #26365c;
+    --accent: #ff8a5c; --accent-ink: #1a0800; --flash: #ffd43b; --flash-ink: #2a2000;
+    --good: #4fcf8d; --good-soft: #12321f; --bad: #ff7d6e; --bad-soft: #3a1714;
+    --code-bg: #060d1c; --code-ink: #e7edfb; --code-com: #7d8cad;
+    --chrome: #2a3654; --chrome-ink: #b8c3dc;
+    --t1: #6fa1ff; --t2: #ffc04d; --t3: #4fcf8d; --t4: #ff7fb0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1325; --surface: #121f3a; --ink: #eef2fb; --muted: #9eabc6; --line: #26365c;
+  --accent: #ff8a5c; --accent-ink: #1a0800; --flash: #ffd43b; --flash-ink: #2a2000;
+  --good: #4fcf8d; --good-soft: #12321f; --bad: #ff7d6e; --bad-soft: #3a1714;
+  --code-bg: #060d1c; --code-ink: #e7edfb; --code-com: #7d8cad;
+  --chrome: #2a3654; --chrome-ink: #b8c3dc;
+  --t1: #6fa1ff; --t2: #ffc04d; --t3: #4fcf8d; --t4: #ff7fb0;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.45;
+  display: flex; flex-direction: column;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px;
+  gap: 12px;
+  overflow-x: hidden;
+}
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--flash); outline-offset: 2px; }
+
+.bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: -0.01em; white-space: nowrap; }
+.brand span { color: var(--accent); }
+.track { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 auto; min-width: 0; }
+.chip { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.chip.done { color: var(--ink); }
+.chip.now { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.tool { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 6px 12px; font-size: 13px; font-weight: 700; }
+.tool[aria-pressed="false"] { color: var(--muted); }
+
+.stage {
+  flex: 1 1 auto; min-height: 0; overflow: auto;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+  padding: clamp(16px, 2.4vw, 40px);
+  display: flex; flex-direction: column; gap: clamp(10px, 1.2vw, 20px);
+}
+.eyebrow { font-size: clamp(13px, 1vw, 17px); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.q-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 2.5vw, 44px); line-height: 1.15; text-wrap: balance; margin: 4px 0 0; }
+.q-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: clamp(16px, 2vw, 36px); align-items: start; }
+.q-body.wide { grid-template-columns: minmax(0, 1fr); }
+.q-body.split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.q-main { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+.code {
+  margin: 0; background: var(--code-bg); color: var(--code-ink);
+  font-family: var(--font-code); font-size: clamp(16px, 2vw, 36px); line-height: 1.4;
+  border-radius: 14px; padding: clamp(14px, 1.6vw, 28px) clamp(16px, 2vw, 34px);
+  overflow-x: auto; tab-size: 2;
+}
+.code.small { font-size: clamp(13px, 1.35vw, 25px); }
+.code .ln { display: block; padding-inline: 8px; margin-inline: -8px; border-radius: 6px; white-space: pre; }
+.code .ln.bad { background: color-mix(in srgb, var(--bad) 38%, transparent); }
+.code .ln.good { background: color-mix(in srgb, var(--good) 38%, transparent); }
+.tg { color: var(--code-tag); }
+.at { color: var(--code-attr); }
+.vl { color: var(--code-val); }
+.cm { color: var(--code-com); font-style: italic; }
+
+.ask {
+  border-left: 6px solid var(--flash); background: color-mix(in srgb, var(--flash) 14%, var(--surface));
+  border-radius: 0 12px 12px 0; padding: 12px 18px; font-size: clamp(18px, 1.8vw, 32px); font-weight: 800; text-wrap: balance;
+}
+.ask.compact { font-size: clamp(15px, 1.2vw, 22px); padding: 6px 14px; }
+.ask small { display: block; font-size: 0.55em; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.teacher { margin-top: auto; display: grid; gap: 6px; font-size: 14px; color: var(--muted); max-width: 46ch; }
+.teacher b { color: var(--ink); }
+
+/* Вікно браузера */
+.browser { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--page-bg); min-width: 0; }
+.browser .chrome { display: flex; gap: 8px; align-items: center; padding: 6px 12px; background: var(--chrome); color: var(--chrome-ink); font-size: 13px; font-weight: 700; }
+.browser .chrome i { width: 10px; height: 10px; border-radius: 50%; background: var(--chrome-ink); opacity: .35; }
+.browser .chrome span { margin-left: 6px; font-family: var(--font-code); font-weight: 400; }
+.page { background: var(--page-bg); color: var(--page-ink); font-family: var(--font-page); font-size: clamp(16px, 1.5vw, 27px); line-height: 1.3; padding: 8px 18px 14px; overflow-x: auto; }
+.page.small { font-size: clamp(14px, 1.15vw, 21px); }
+.page h1, .page h2, .page h3, .page h4, .page h5, .page h6 { margin: 0.35em 0; }
+.page p { margin: 0.4em 0; }
+.page ul, .page ol { margin: 0.3em 0; padding-left: 1.6em; }
+.page table { border-collapse: collapse; margin: 0.3em 0; }
+.page th, .page td { border: 1px solid var(--page-line); padding: 4px 10px; }
+.page th { background: var(--page-th); }
+.page caption { padding-bottom: 4px; }
+.page img { vertical-align: top; }
+.page img:not([width]) { max-width: 100%; max-height: 7em; width: auto; height: auto; }
+
+/* Таймер */
+.timer { display: grid; justify-items: center; gap: 10px; }
+.ring { width: clamp(120px, 12vw, 220px); aspect-ratio: 1; max-width: 100%; position: relative; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 10; }
+.ring .track-c { stroke: var(--line); }
+.ring .fill-c { stroke: var(--flash); stroke-linecap: round; transition: stroke-dashoffset 0.25s linear, stroke 0.2s; }
+.ring.low .fill-c { stroke: var(--bad); }
+.ring .num { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 4vw, 72px); font-variant-numeric: tabular-nums; }
+.ring.over .num { font-size: clamp(24px, 2.6vw, 46px); color: var(--bad); }
+.ring.low:not(.over) .num { color: var(--bad); }
+@media (prefers-reduced-motion: no-preference) {
+  .ring.low:not(.over):not(.paused) { animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.04); } }
+}
+
+/* Відповідь */
+.answer { display: grid; gap: 12px; }
+.answer[hidden] { display: none !important; }
+.reveal { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.reveal > div { min-width: 0; display: grid; gap: 10px; align-content: start; }
+.ans { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 2.4vw, 44px); line-height: 1.2; background: var(--good-soft); border: 2px solid var(--good); border-radius: 14px; padding: 12px 20px; text-wrap: balance; }
+.out-label { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.out-label.bad { color: var(--bad); }
+.out-label.good { color: var(--good); }
+.explain { font-size: clamp(16px, 1.4vw, 26px); max-width: 60ch; margin: 0; text-wrap: pretty; }
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.compare > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.rows { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.rows .col { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.rows .code.small { font-size: clamp(12px, 1.15vw, 21px); padding: 12px 18px; }
+.rows .page.small { font-size: clamp(13px, 1.05vw, 19px); }
+.miss { margin: 0; font-weight: 700; color: var(--bad); font-size: clamp(15px, 1.2vw, 22px); }
+.note { border: 2px solid var(--accent); border-radius: 14px; padding: 12px 18px; font-size: clamp(17px, 1.6vw, 28px); font-weight: 700; margin: 0; }
+
+.controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn { border: 2px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 18px; font-weight: 800; font-size: 16px; min-height: 48px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.flash { background: var(--flash); border-color: var(--flash); color: var(--flash-ink); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.spacer { flex: 1 1 auto; }
+.keys { font-size: 13px; color: var(--muted); }
+kbd { font-family: var(--font-code); font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; }
+
+.board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.team { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; border-top: 6px solid var(--tc); padding: 8px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 8px; align-items: center; }
+.team.lead { box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 45%, transparent); }
+.team-name { font-weight: 800; font-size: clamp(14px, 1.2vw, 20px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.team-score { grid-row: span 2; font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 3vw, 54px); color: var(--tc); font-variant-numeric: tabular-nums; min-width: 1.6ch; text-align: right; }
+.team-btns { display: flex; gap: 6px; }
+.pt { border: 1px solid var(--line); background: transparent; border-radius: 8px; min-width: 40px; min-height: 34px; font-weight: 800; }
+.pt.plus { background: color-mix(in srgb, var(--tc) 16%, transparent); border-color: color-mix(in srgb, var(--tc) 50%, transparent); }
+
+.intro > div:first-child { display: flex; flex-direction: column; gap: 4px; align-self: stretch; }
+.intro { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(20px, 3vw, 56px); align-items: start; }
+.hero-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 5vw, 92px); line-height: 1.02; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.hero-title span { color: var(--accent); }
+.hero-sub { font-size: clamp(17px, 1.6vw, 28px); color: var(--muted); margin: 10px 0 0; max-width: 34ch; }
+.rules { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: clamp(15px, 1.3vw, 23px); }
+.rules li { display: grid; grid-template-columns: 5.2em minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.rules b { font-family: var(--font-display); font-size: 0.85em; color: var(--accent); }
+.setup { display: grid; gap: 10px; }
+.setup h3 { margin: 0; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.names label, .times label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.names input, .times select { border: 1px solid var(--line); border-left: 6px solid var(--tc, var(--line)); background: var(--bg); border-radius: 10px; padding: 8px 10px; font-weight: 700; min-width: 0; width: 100%; }
+.times { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.section { margin: auto 0; display: grid; gap: 14px; max-width: 60ch; }
+.section .big { font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 4.4vw, 80px); line-height: 1.05; margin: 0; text-wrap: balance; }
+.section p { font-size: clamp(17px, 1.6vw, 28px); margin: 0; }
+.section ol { margin: 0; padding-left: 1.4em; font-size: clamp(16px, 1.45vw, 26px); display: grid; gap: 6px; }
+
+.podium { display: grid; gap: 10px; max-width: 760px; }
+.podium .row { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; gap: 14px; align-items: center; border: 1px solid var(--line); border-left: 8px solid var(--tc); border-radius: 14px; padding: 10px 18px; font-size: clamp(18px, 1.8vw, 32px); font-weight: 800; }
+.podium .row.win { background: color-mix(in srgb, var(--flash) 22%, var(--surface)); border-color: var(--flash); border-left-color: var(--tc); }
+.podium .place { font-family: var(--font-display); color: var(--muted); }
+.podium .sc { font-family: var(--font-display); color: var(--tc); font-variant-numeric: tabular-nums; }
+.confirm { display: inline-flex; gap: 6px; align-items: center; }
+
+/* Пісочниця */
+.sandbox[hidden] { display: none; }
+.sandbox { position: fixed; inset: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; }
+.sandbox-head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.sandbox-head h2 { margin: 0; font-family: var(--font-display); font-size: clamp(20px, 2vw, 32px); }
+.sandbox-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; min-height: 0; }
+.sandbox textarea { width: 100%; height: 100%; min-height: 240px; resize: none; background: var(--code-bg); color: var(--code-ink); font-family: var(--font-code); font-size: clamp(15px, 1.4vw, 24px); line-height: 1.5; border: 0; border-radius: 14px; padding: 16px 20px; tab-size: 2; }
+.sandbox .browser { display: flex; flex-direction: column; min-height: 240px; }
+.sandbox .page { flex: 1 1 auto; overflow: auto; }
+
+@media (max-width: 860px) {
+  body { overflow-y: auto; height: auto; min-height: 100%; }
+  .stage { overflow: visible; }
+  .q-body, .q-body.split, .intro, .compare, .reveal, .rows, .sandbox-body { grid-template-columns: minmax(0, 1fr); }
+  .timer { justify-self: start; }
+  .ring { width: 110px; }
+  .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .keys { display: none; }
+  .sandbox { overflow: auto; }
+}
+</style>
+
+<header class="bar">
+  <div class="brand">HTML: <span>мозковий штурм</span></div>
+  <nav class="track" id="track" aria-label="Етапи гри"></nav>
+  <div class="tools">
+    <button class="tool" id="sandbox-btn" type="button">Пісочниця</button>
+    <button class="tool" id="sound-btn" type="button" aria-pressed="true">Звук</button>
+    <button class="tool" id="theme-btn" type="button">Тема</button>
+    <button class="tool" id="full-btn" type="button">Екран</button>
+  </div>
+</header>
+
+<main class="stage" id="stage" aria-live="polite"></main>
+
+<section class="board" id="board" aria-label="Табло команд"></section>
+
+<div class="sandbox" id="sandbox" hidden role="dialog" aria-label="Пісочниця">
+  <div class="sandbox-head">
+    <h2>Пісочниця</h2>
+    <span class="keys">Пишіть код ліворуч, браузер праворуч оновлюється сам. Файл cat.jpg тут «є».</span>
+    <span class="spacer"></span>
+    <button class="btn" type="button" id="sb-slide">Взяти код зі слайда</button>
+    <button class="btn primary" type="button" id="sb-close">Закрити <kbd>Esc</kbd></button>
+  </div>
+  <div class="sandbox-body">
+    <textarea id="sb-code" spellcheck="false" autocapitalize="off" aria-label="Код HTML"></textarea>
+    <div class="browser"><div class="chrome"><i></i><i></i><i></i><span>index.html</span></div><div class="page" id="sb-page"></div></div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  rounds: [
+    { topic: "Заголовки", questions: [
+      { code: `<h2>Розклад</h2>
+<h1>Понеділок</h1>
+<h4>Урок 1</h4>`,
+        ask: "Який напис буде найбільшим?", answer: "«Понеділок»",
+        explain: "Розмір залежить від тегу, а не від того, що вище в коді. h1 — найбільший, тому «Понеділок» більший за «Розклад» у h2." },
+      { code: `<h1>Мій</h1>
+<h1>сайт</h1>`,
+        ask: "У скільки рядків буде текст на сторінці?", answer: "2",
+        explain: "Кожен заголовок завжди починається з нового рядка. Щоб «Мій сайт» стояв в одному рядку, потрібен один h1." },
+      { code: `<h1>Мій клас</h1>
+<p>Нас 28 учнів.</p>
+<h2>Наші свята</h2>
+<h7>Новий рік</h7>`,
+        ask: "Скільки заголовків побачить браузер?", answer: "2",
+        explain: "Заголовки бувають тільки від h1 до h6. Тегу h7 не існує, тому «Новий рік» — звичайний текст." }
+    ]},
+    { topic: "Картинки img", questions: [
+      { code: `<!-- cat.jpg лежить поруч з index.html -->
+<img src="images/cat.jpg"
+     alt="Рудий кіт">`, small: true,
+        ask: "Що покаже браузер?", answer: "Текст «Рудий кіт» замість картинки",
+        explain: "Браузер шукає файл у папці images, а він лежить поруч. Картинка не знайдеться — тоді видно alt." },
+      { code: `<!-- cat.jpg має розмір 800 × 600 -->
+<img src="cat.jpg" alt="Кіт"
+     width="200">`, small: true,
+        ask: "Якою буде висота картинки?", answer: "150 пікселів",
+        explain: "Якщо задати лише width, браузер зберігає пропорції. 800 → 200 — це вчетверо менше, тож висота 600 : 4 = 150." },
+      { code: `<!-- cat.jpg має розмір 800 × 600 -->
+<img src="cat.jpg" alt="Кіт"
+     width="80" height="200">`, small: true,
+        ask: "Якою буде картинка?", answer: "Витягнута вгору: 80 × 200, кіт «сплющений»",
+        explain: "Коли задано і width, і height, браузер не зберігає пропорції, а просто розтягує картинку під ці числа. Тому краще задавати щось одне." }
+    ]},
+    { topic: "Списки ul і ol", questions: [
+      { code: `<ol start="3">
+  <li>Сніданок</li>
+  <li>Школа</li>
+  <li>Гурток</li>
+</ol>`,
+        ask: "Які номери будуть біля пунктів?", answer: "3, 4, 5",
+        explain: "start=\"3\" — нумерація починається з трьох." },
+      { code: `<ol type="A" reversed>
+  <li>Старт</li>
+  <li>Біг</li>
+  <li>Фініш</li>
+</ol>`,
+        ask: "Яка літера буде біля «Фініш»?", answer: "A",
+        explain: "type=\"A\" — великі літери, reversed — у зворотному порядку: C, B, A. «Фініш» — останній, тому A." },
+      { code: `<ol start="10" reversed>
+  <li>Підготовка</li>
+  <li>Старт</li>
+  <li>Політ</li>
+</ol>`,
+        ask: "Які номери будуть біля пунктів?", answer: "10, 9, 8",
+        explain: "start=\"10\" — перший номер 10, reversed — далі рахуємо вниз: 9, 8." }
+    ]},
+    { topic: "Вкладені списки", questions: [
+      { code: `<ul>
+  <li>Фрукти
+    <ol>
+      <li>Яблуко</li>
+      <li>Груша</li>
+    </ol>
+  </li>
+  <li>Овочі</li>
+  <li>Ягоди</li>
+</ul>`, small: true,
+        ask: "Скільки пунктів з маркером і скільки з номером?", answer: "3 з маркером, 2 з номером",
+        explain: "Зовнішній ul має 3 пункти: Фрукти, Овочі, Ягоди. Вкладений ol — 2 пункти з номерами." },
+      { code: `<ol>
+  <li>Тісто
+    <ol>
+      <li>Борошно</li>
+      <li>Яйця</li>
+    </ol>
+  </li>
+  <li>Начинка</li>
+</ol>`, small: true,
+        ask: "Який номер стоятиме біля «Начинка»?", answer: "2",
+        explain: "Вкладений список рахує сам по собі: Борошно 1, Яйця 2. Зовнішній веде свою нумерацію: Тісто 1, Начинка 2." },
+      { code: `<ul>
+  <li>Школа
+    <ul>
+      <li>Уроки
+        <ul>
+          <li>Інформатика</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>`, small: true,
+        ask: "Скільки рівнів у цьому списку?", answer: "3",
+        explain: "Кожен ul усередині li — новий рівень: Школа → Уроки → Інформатика. Браузер ще й міняє маркер на кожному рівні: ●, ○, ■." }
+    ]},
+    { topic: "Таблиці", questions: [
+      { code: `<table>
+  <caption>Оцінки</caption>
+  <tr><th>Ім'я</th><th>Бал</th></tr>
+  <tr><td>Олена</td><td>11</td></tr>
+  <tr><td>Максим</td><td>9</td></tr>
+</table>`, small: true,
+        ask: "Скільки рядків і стовпців у таблиці?", answer: "3 рядки, 2 стовпці",
+        explain: "Рядків стільки, скільки тегів tr, — 3. caption — це підпис над таблицею, а не рядок." },
+      { code: `<table>
+  <tr><th>День</th><th>Урок</th></tr>
+  <tr><td>Пн</td><td>Музика</td></tr>
+  <tr><th>Вт</th><td>Фізика</td></tr>
+</table>`, small: true,
+        ask: "Які слова браузер зробить жирними?", answer: "День, Урок і Вт",
+        explain: "Жирним і по центру браузер показує комірки th. «Вт» теж у th, хоч і не в першому рядку. Усі td — звичайний текст." },
+      { code: `<table>
+  <tr><th colspan="3">Гуртки</th></tr>
+  <tr><td rowspan="2">Пн</td>
+      <td>15:00</td><td>Шахи</td></tr>
+  <tr><td>16:00</td><td>Футбол</td></tr>
+</table>`, small: true,
+        ask: "Скільки стовпців у таблиці?", answer: "3",
+        explain: "У першому рядку одна комірка, але colspan=\"3\" розтягує її на 3 стовпці. У третьому рядку лише 2 td, бо «Пн» з rowspan=\"2\" займає місце зверху." }
+    ]}
+  ],
+  bugs: [
+    { topic: "Заголовки", task: "Великий заголовок «Мій сайт», а під ним менший «Про мене».",
+      code: `<h6>Мій сайт</h6>
+<h1>Про мене</h1>
+<p>Мені 12 років.</p>`,
+      fixed: `<h1>Мій сайт</h1>
+<h2>Про мене</h2>
+<p>Мені 12 років.</p>`,
+      explain: "ШІ переплутав рівні: h6 — найменший заголовок, h1 — найбільший. Головний заголовок сторінки — h1, підзаголовок — h2." },
+    { topic: "Картинки img", task: "Покажи фото кота і підпиши його для тих, хто не бачить картинку.",
+      code: `<h2>Мій кіт</h2>
+<img scr="cat.jpg" alt="Мій кіт Барсик">`,
+      fixed: `<h2>Мій кіт</h2>
+<img src="cat.jpg" alt="Мій кіт Барсик">`,
+      explain: "scr замість src: браузер не знає, де картинка, і показує тільки alt. Одна переставлена літера — і фото немає." },
+    { topic: "Списки ul і ol", task: "Інструкція з 3 кроків, кроки пронумеровані 1, 2, 3.",
+      code: `<h2>Як посадити квітку</h2>
+<ul>
+  <li>Насип землю</li>
+  <li>Посади насінину</li>
+  <li>Полий</li>
+</ul>`,
+      fixed: `<h2>Як посадити квітку</h2>
+<ol>
+  <li>Насип землю</li>
+  <li>Посади насінину</li>
+  <li>Полий</li>
+</ol>`,
+      explain: "ul дає маркери-крапки, номерів немає. Для кроків, де важливий порядок, потрібен ol." },
+    { topic: "Вкладені списки", task: "Рюкзак: «Зошити» з вкладеним списком предметів, а «Обід» — окремий пункт.",
+      code: `<ul>
+  <li>Зошити
+    <ul>
+      <li>Математика</li>
+      <li>Мова</li>
+  </li>
+  <li>Обід</li>
+</ul>`,
+      fixed: `<ul>
+  <li>Зошити
+    <ul>
+      <li>Математика</li>
+      <li>Мова</li>
+    </ul>
+  </li>
+  <li>Обід</li>
+</ul>`,
+      explain: "ШІ не закрив вкладений список — бракує </ul>. Через це «Обід» потрапив усередину зошитів. Кожен відкритий список треба закрити." },
+    { topic: "Таблиці", task: "Розклад на 3 стовпці, «Перерва» — на всю ширину таблиці.",
+      code: `<table>
+  <tr><td>1</td><td>Математика</td><td>9:00</td></tr>
+  <tr><td colspan="3">Перерва</td><td>9:45</td></tr>
+  <tr><td>2</td><td>Історія</td><td>10:00</td></tr>
+</table>`,
+      fixed: `<table>
+  <tr><td>1</td><td>Математика</td><td>9:00</td></tr>
+  <tr><td colspan="3">Перерва 9:45</td></tr>
+  <tr><td>2</td><td>Історія</td><td>10:00</td></tr>
+</table>`,
+      explain: "colspan=\"3\" вже займає всі 3 стовпці. Зайва td виштовхує рядок за межі таблиці — з'являється четвертий стовпець." }
+  ],
+  final: { code: `<h2>Мій день</h2>
+<ol start="7">
+  <li>Підйом</li>
+  <li>Школа
+    <ul><li>Інформатика</li></ul>
+  </li>
+</ol>
+<table>
+  <tr><td colspan="2">Вечір</td></tr>
+  <tr><td>Футбол</td><td>Уроки</td></tr>
+</table>`, small: true,
+    ask: "Які номери в списку і скільки стовпців у таблиці?", answer: "7 і 8; 2 стовпці",
+    explain: "start=\"7\" — список починається з 7, «Інформатика» з маркером, бо це вкладений ul. «Вечір» розтягнутий на 2 стовпці, а в другому рядку 2 td." }
+};
+
+/* ---------- Картинка-заглушка cat.jpg (800 × 600) ---------- */
+const CAT = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" preserveAspectRatio="none">
+<rect width="800" height="600" fill="#cfe3f5"/><rect y="430" width="800" height="170" fill="#a8cf8e"/>
+<polygon points="290,200 330,90 380,180" fill="#e8892f"/><polygon points="510,200 470,90 420,180" fill="#e8892f"/>
+<circle cx="400" cy="270" r="140" fill="#f0a04b"/>
+<circle cx="350" cy="250" r="18" fill="#222"/><circle cx="450" cy="250" r="18" fill="#222"/>
+<polygon points="400,295 385,280 415,280" fill="#c0504d"/>
+<path d="M370 315 Q400 335 430 315" stroke="#222" stroke-width="6" fill="none"/>
+<rect x="250" y="400" width="300" height="160" rx="70" fill="#f0a04b"/>
+<text x="400" y="590" font-family="Arial" font-size="28" text-anchor="middle" fill="#2c3e50">cat.jpg · 800 × 600</text></svg>`);
+const toPage = html => html.replace(/src="cat\.jpg"/g, `src="${CAT}"`);
+
+/* ---------- Слайди ---------- */
+const SLIDES = [];
+SLIDES.push({ type: "intro", chip: "Старт" });
+SLIDES.push({ type: "section", chip: "Що покаже браузер?", big: "Що покаже браузер?",
+  text: "Команда радиться, пише відповідь на аркуші й піднімає за сигналом. Правильно — 1 бал. Читайте кожен тег уважно: одна літера змінює все." });
+let qn = 0;
+const totalQ = DATA.rounds.reduce((s, r) => s + r.questions.length, 0);
+DATA.rounds.forEach((r, ri) => r.questions.forEach(q => {
+  qn++;
+  SLIDES.push({ type: "out", chip: "Що покаже браузер?", round: ri + 1, topic: r.topic, n: qn, of: totalQ, points: 1, timeKey: "out", ...q });
+}));
+SLIDES.push({ type: "section", chip: "Пазл", big: "Пазл з коду",
+  text: "Кожна команда отримує конверт зі смужками коду. Складіть програму в правильному порядку, з правильними відступами. Склали — піднімайте руку.",
+  steps: ["Пазл 1 — сторінка з заголовком і картинкою", "Пазл 2 — вкладений список (є зайві смужки!)", "Пазл 3 — таблиця з colspan (є зайві смужки!)", "1 бал за кожен пазл, перша команда з трьома — ще +1"] });
+SLIDES.push({ type: "section", chip: "ШІ помилився", big: "ШІ помилився",
+  text: "Учні попросили ШІ зробити сторінку. Код виглядає правильно, але браузер покаже не те. Знайдіть рядок з помилкою і скажіть, як виправити. Помилка + виправлення — 2 бали." });
+DATA.bugs.forEach((b, i) => SLIDES.push({ type: "bug", chip: "ШІ помилився", n: i + 1, of: DATA.bugs.length, points: 2, timeKey: "bug", ...b }));
+SLIDES.push({ type: "out", chip: "Суперпитання", topic: "усе разом", super: true, points: 2, timeKey: "super", ...DATA.final });
+SLIDES.push({ type: "end", chip: "Фінал" });
+
+const TEAM_DEFAULT = ["Теги", "Пікселі", "Браузери", "Атрибути"];
+const TIMES = { out: 30, bug: 60, super: 45 };
+
+let state = { i: 0, teams: TEAM_DEFAULT.slice(), scores: [0, 0, 0, 0], times: { ...TIMES }, sound: true };
+const KEY = "html-brain-ring-v1";
+function load() {
+  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && Array.isArray(s.scores)) state = { ...state, ...s, times: { ...TIMES, ...(s.times || {}) } }; } catch (e) {}
+  fixIndex();
+}
+function fixIndex() { const n = +state.i; state.i = Number.isInteger(n) && n >= 0 && n < SLIDES.length ? n : 0; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+let revealed = false;
+let timer = { total: 0, left: 0, running: false, id: null, done: false };
+
+/* ---------- Підсвічування HTML ---------- */
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function hlLine(line) {
+  let s = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  s = s.replace(/&lt;!--[\s\S]*?--&gt;/g, m => "\u0001" + m + "\u0002");
+  s = s.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)([^&]*?)(\/?&gt;)/g, (m, a, t, attrs, b) => {
+    attrs = attrs.replace(/([a-zA-Z-]+)(=)("[^"]*")/g, '<span class="at">$1</span>$2<span class="vl">$3</span>')
+                 .replace(/(\s)(reversed)(?=\s|$)/g, '$1<span class="at">$2</span>');
+    return '<span class="tg">' + a + t + "</span>" + attrs + '<span class="tg">' + b + "</span>";
+  });
+  return s.replace(/\u0001/g, '<span class="cm">').replace(/\u0002/g, "</span>");
+}
+function codeHTML(code, marks, cls) {
+  return `<pre class="code ${cls || ""}"><code>${code.split("\n").map((l, i) =>
+    `<span class="ln ${marks && marks[i] ? marks[i] : ""}">${hlLine(l) || " "}</span>`).join("")}</code></pre>`;
+}
+function badLines(s) { const f = new Set(s.fixed.split("\n")); return s.code.split("\n").filter(l => !f.has(l)).map(l => l.trim()).join("\n"); }
+function diffMarks(a, b, mark) {
+  const other = new Set(b.split("\n"));
+  return a.split("\n").map(l => other.has(l) ? "" : mark);
+}
+const browserHTML = (html, cls, name) => `<div class="browser"><div class="chrome"><i></i><i></i><i></i><span>${name || "index.html"}</span></div><div class="page ${cls || ""}">${toPage(html)}</div></div>`;
+
+const $ = id => document.getElementById(id);
+const stage = $("stage");
+
+function renderTrack() {
+  const chips = [];
+  SLIDES.forEach((s, i) => { if (!chips.length || chips[chips.length - 1].name !== s.chip) chips.push({ name: s.chip, first: i, last: i }); else chips[chips.length - 1].last = i; });
+  $("track").innerHTML = chips.map(c => {
+    const cls = state.i >= c.first && state.i <= c.last ? "now" : state.i > c.last ? "done" : "";
+    return `<button class="chip ${cls}" type="button" data-go="${c.first}">${esc(c.name)}</button>`;
+  }).join("");
+}
+function renderBoard() {
+  const max = Math.max(...state.scores);
+  $("board").innerHTML = state.teams.map((t, i) => `
+    <div class="team ${max > 0 && state.scores[i] === max ? "lead" : ""}" style="--tc: var(--t${i + 1})">
+      <div class="team-name" title="${esc(t)}">${i + 1}. ${esc(t)}</div>
+      <div class="team-score" aria-label="Бали команди ${esc(t)}">${state.scores[i]}</div>
+      <div class="team-btns">
+        <button class="pt" type="button" data-pt="${i}" data-d="-1" aria-label="Мінус бал: ${esc(t)}">−1</button>
+        <button class="pt plus" type="button" data-pt="${i}" data-d="1" aria-label="Плюс бал: ${esc(t)}">+1</button>
+      </div>
+    </div>`).join("");
+}
+function controlsHTML(s) {
+  const hasReveal = s.type === "out" || s.type === "bug" || s.type === "warm";
+  return `<div class="controls">
+    <button class="btn" type="button" data-act="prev" ${state.i === 0 ? "disabled" : ""}>← Назад</button>
+    ${s.timeKey ? `<button class="btn flash" type="button" data-act="timer" id="timer-btn">Старт таймера</button>` : ""}
+    ${hasReveal ? `<button class="btn" type="button" data-act="reveal">${revealed ? "Сховати відповідь" : "Показати відповідь"}</button>` : ""}
+    <span class="spacer"></span>
+    <span class="keys"><kbd>Пробіл</kbd> таймер · <kbd>Enter</kbd> відповідь · <kbd>1</kbd>–<kbd>4</kbd> бал команді · <kbd>→</kbd> далі</span>
+    <button class="btn primary" type="button" data-act="next" ${state.i === SLIDES.length - 1 ? "disabled" : ""}>Далі →</button>
+  </div>`;
+}
+function timerHTML() {
+  return `<div class="timer"><div class="ring" id="ring">
+    <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track-c" cx="60" cy="60" r="52"/><circle class="fill-c" id="ring-fill" cx="60" cy="60" r="52"/></svg>
+    <div class="num" id="ring-num" role="timer" aria-live="off"></div></div></div>`;
+}
+
+function render() {
+  const s = SLIDES[state.i];
+  renderTrack(); renderBoard();
+  let h = "";
+  if (s.type === "intro") {
+    h = `<div class="intro">
+      <div>
+        <div class="eyebrow">Командна гра · 7 клас</div>
+        <h1 class="hero-title">HTML: <span>мозковий штурм</span></h1>
+        <p class="hero-sub">Повторюємо: заголовки, картинки, списки й таблиці.</p>
+        <div class="teacher">
+          <div><b>Для вчителя.</b> Керуйте з клавіатури ноутбука:</div>
+          <div><kbd>→</kbd> далі · <kbd>←</kbd> назад · <kbd>Пробіл</kbd> таймер · <kbd>Enter</kbd> показати відповідь</div>
+          <div><kbd>1</kbd>–<kbd>4</kbd> бал команді · <kbd>Shift</kbd>+<kbd>1</kbd>–<kbd>4</kbd> забрати бал</div>
+          <div>«Пісочниця» вгорі — показати будь-який код у браузері прямо на уроці.</div>
+          <div>Бали й назви команд зберігаються в цьому браузері, навіть якщо сторінку закрити.</div>
+        </div>
+      </div>
+      <div class="setup">
+        <ul class="rules">
+          <li><b>Раунди</b><span>«Що покаже браузер?» — 15 питань, ${state.times.out} с, 1 бал.</span></li>
+          <li><b>Пазл</b><span>Скласти код зі смужок — на швидкість.</span></li>
+          <li><b>ШІ</b><span>Знайти помилку в коді від ШІ — ${state.times.bug} с, 2 бали.</span></li>
+          <li><b>Супер</b><span>Фінальне питання — ${state.times.super} с, 2 бали.</span></li>
+        </ul>
+        <h3>Команди</h3>
+        <div class="names">${state.teams.map((t, i) => `<label for="team-name-${i + 1}">Команда ${i + 1}
+          <input id="team-name-${i + 1}" data-team="${i}" value="${esc(t)}" maxlength="20" style="--tc: var(--t${i + 1})"></label>`).join("")}</div>
+        <h3>Час на відповідь</h3>
+        <div class="times">
+          ${[["out", "Що покаже браузер?"], ["bug", "ШІ помилився"], ["super", "Суперпитання"]].map(([k, l]) => `<label for="time-${k}">${l}
+            <select id="time-${k}" data-time="${k}">${[20, 30, 45, 60, 90].map(v => `<option value="${v}" ${state.times[k] === v ? "selected" : ""}>${v} с</option>`).join("")}</select></label>`).join("")}
+        </div>
+        <div class="controls">
+          <span id="reset-zone"><button class="btn" type="button" data-act="reset-ask">Обнулити бали</button></span>
+          <span class="spacer"></span>
+          <button class="btn primary" type="button" data-act="next">Почати гру →</button>
+        </div>
+      </div>
+    </div>`;
+  } else if (s.type === "section") {
+    h = `<div class="section"><div class="eyebrow">Новий етап</div><h2 class="big">${esc(s.big)}</h2><p>${esc(s.text)}</p>
+      ${s.steps ? `<ol>${s.steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}</div>${controlsHTML(s)}`;
+  } else if (s.type === "warm") {
+    h = `<div class="eyebrow">Розминка · ${s.n} / ${s.of}</div>
+      <h2 class="q-title">${esc(s.title)}</h2>
+      ${codeHTML(s.code)}
+      <div class="answer" ${revealed ? "" : "hidden"}><p class="note">${esc(s.note)}</p></div>
+      ${controlsHTML(s)}`;
+  } else if (s.type === "out") {
+    const label = s.super ? `Суперпитання · ${s.points} бали` : `Раунд ${s.round} · ${esc(s.topic)} · питання ${s.n} / ${s.of}`;
+    h = `<div><div class="eyebrow">${label}</div><h2 class="q-title">Що покаже браузер?</h2></div>
+      <div class="q-body ${revealed ? "split" : ""}">
+        <div class="q-main">
+          ${codeHTML(s.code, null, s.small ? "small" : "")}
+          <div class="ask"><small>Питання</small>${esc(s.ask)}</div>
+        </div>
+        ${revealed ? `<div class="answer">
+            <div class="out-label">Відповідь</div><p class="ans">${esc(s.answer)}</p>
+            <div class="out-label">Так покаже браузер</div>${browserHTML(s.code, "small")}
+            <p class="explain">${esc(s.explain)}</p>
+          </div>` : timerHTML()}
+      </div>${controlsHTML(s)}`;
+  } else if (s.type === "bug") {
+    h = `<div><div class="eyebrow">ШІ помилився · ${esc(s.topic)} · ${s.n} / ${s.of} · 2 бали</div>
+        ${revealed ? "" : `<h2 class="q-title">Знайдіть помилку</h2>`}</div>
+      <div class="q-body ${revealed ? "wide" : ""}">
+        <div class="q-main">
+          <div class="ask ${revealed ? "compact" : ""}"><small>Учень попросив ШІ</small>«${esc(s.task)}»</div>
+          ${revealed ? "" : codeHTML(s.code)}
+          <div class="answer" ${revealed ? "" : "hidden"}>
+            <div class="rows">
+              <div class="col">
+                <div class="out-label bad">Помилка</div>
+                ${badLines(s) ? codeHTML(badLines(s), badLines(s).split("\n").map(() => "bad"), "small") : `<p class="miss">Рядка бракує взагалі — він підсвічений зеленим нижче.</p>`}
+                <div class="out-label good">Виправлено</div>
+                ${codeHTML(s.fixed, diffMarks(s.fixed, s.code, "good"), "small")}
+              </div>
+              <div class="col">
+                <div class="out-label bad">Було в браузері</div>${revealed ? browserHTML(s.code, "small") : ""}
+                <div class="out-label good">Стало</div>${revealed ? browserHTML(s.fixed, "small") : ""}
+              </div>
+            </div>
+            <p class="explain">${esc(s.explain)}</p>
+          </div>
+        </div>
+        ${revealed ? "" : timerHTML()}
+      </div>${controlsHTML(s)}`;
+  } else if (s.type === "end") {
+    const order = state.teams.map((t, i) => ({ t, i, sc: state.scores[i] })).sort((a, b) => b.sc - a.sc);
+    const top = order[0].sc;
+    h = `<div class="section" style="max-width:none"><div class="eyebrow">Фінал</div><h2 class="big">Результати</h2>
+      <div class="podium">${order.map(o => `<div class="row ${o.sc === top && top > 0 ? "win" : ""}" style="--tc: var(--t${o.i + 1})">
+        <span class="place">${order.findIndex(x => x.sc === o.sc) + 1}</span><span>${esc(o.t)}</span><span class="sc">${o.sc}</span></div>`).join("")}</div>
+      <p>Далі — вихідний квиток: самостійно, без команди.</p></div>${controlsHTML(s)}`;
+  }
+  stage.innerHTML = h;
+  if (s.timeKey) drawTimer();
+}
+
+/* ---------- Таймер ---------- */
+function resetTimer() {
+  clearInterval(timer.id);
+  const s = SLIDES[state.i];
+  const t = s.timeKey ? state.times[s.timeKey] : 0;
+  timer = { total: t, left: t, running: false, id: null, done: false };
+}
+function drawTimer() {
+  const ring = $("ring"), fill = $("ring-fill"), num = $("ring-num");
+  const b = $("timer-btn");
+  if (b) b.textContent = timer.running ? "Пауза" : timer.done ? "Ще раз" : timer.left < timer.total ? "Продовжити" : "Старт таймера";
+  if (!ring) return;
+  const C = 2 * Math.PI * 52;
+  fill.style.strokeDasharray = C;
+  fill.style.strokeDashoffset = C * (1 - timer.left / timer.total);
+  num.textContent = timer.done ? "Час!" : Math.ceil(timer.left);
+  ring.classList.toggle("low", timer.left <= 5);
+  ring.classList.toggle("over", timer.done);
+  ring.classList.toggle("paused", !timer.running);
+}
+function toggleTimer() {
+  if (!SLIDES[state.i].timeKey) return;
+  if (timer.done) resetTimer();
+  if (timer.running) { clearInterval(timer.id); timer.running = false; drawTimer(); return; }
+  unlockAudio();
+  timer.running = true;
+  let lastBeep = Math.ceil(timer.left);
+  const started = performance.now(), from = timer.left;
+  timer.id = setInterval(() => {
+    timer.left = Math.max(0, from - (performance.now() - started) / 1000);
+    const sec = Math.ceil(timer.left);
+    if (sec !== lastBeep && sec <= 3 && sec > 0) beep(660, 0.08);
+    lastBeep = sec;
+    if (timer.left <= 0) { clearInterval(timer.id); timer.running = false; timer.done = true; beep(440, 0.6); }
+    drawTimer();
+  }, 100);
+  drawTimer();
+}
+
+/* ---------- Звук ---------- */
+let audio = null;
+function unlockAudio() { if (!state.sound) return; try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch (e) { audio = null; } }
+function beep(freq, dur) {
+  if (!state.sound || !audio) return;
+  try {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.frequency.value = freq; o.type = "sine";
+    g.gain.setValueAtTime(0.0001, audio.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.3, audio.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + dur);
+    o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime + dur + 0.05);
+  } catch (e) {}
+}
+
+/* ---------- Пісочниця ---------- */
+const sb = $("sandbox"), sbCode = $("sb-code"), sbPage = $("sb-page");
+const drawSandbox = () => { sbPage.innerHTML = toPage(sbCode.value); };
+function slideCode() { const s = SLIDES[state.i]; return s.code || "<h1>Привіт!</h1>\n<p>Пишіть код тут.</p>"; }
+function openSandbox() { if (!sbCode.value) sbCode.value = slideCode(); drawSandbox(); sb.hidden = false; sbCode.focus(); }
+function closeSandbox() { sb.hidden = true; }
+sbCode.addEventListener("input", drawSandbox);
+sbCode.addEventListener("keydown", e => {
+  if (e.key === "Tab") { e.preventDefault(); sbCode.setRangeText("  ", sbCode.selectionStart, sbCode.selectionEnd, "end"); drawSandbox(); }
+});
+$("sandbox-btn").addEventListener("click", openSandbox);
+$("sb-close").addEventListener("click", closeSandbox);
+$("sb-slide").addEventListener("click", () => { sbCode.value = slideCode(); drawSandbox(); sbCode.focus(); });
+
+/* ---------- Дії ---------- */
+function go(i) {
+  state.i = Math.max(0, Math.min(SLIDES.length - 1, i));
+  revealed = false; resetTimer(); save(); render();
+  stage.scrollTop = 0;
+}
+function reveal() {
+  const s = SLIDES[state.i];
+  if (!["out", "bug", "warm"].includes(s.type)) return;
+  revealed = !revealed;
+  if (revealed && timer.running) { clearInterval(timer.id); timer.running = false; }
+  render();
+}
+function addPoint(t, d) { state.scores[t] = Math.max(0, state.scores[t] + d); save(); renderBoard(); if (SLIDES[state.i].type === "end") render(); }
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.go) return go(+b.dataset.go);
+  if (b.dataset.pt) return addPoint(+b.dataset.pt, +b.dataset.d);
+  const a = b.dataset.act;
+  if (a === "next") go(state.i + 1);
+  else if (a === "prev") go(state.i - 1);
+  else if (a === "timer") toggleTimer();
+  else if (a === "reveal") reveal();
+  else if (a === "reset-ask") {
+    $("reset-zone").innerHTML = `<span class="confirm">Обнулити всі бали? <button class="btn" type="button" data-act="reset-yes">Так</button><button class="btn" type="button" data-act="reset-no">Ні</button></span>`;
+  } else if (a === "reset-yes") { state.scores = [0, 0, 0, 0]; save(); render(); }
+  else if (a === "reset-no") render();
+});
+document.addEventListener("input", e => {
+  if (e.target.dataset.team != null) { state.teams[+e.target.dataset.team] = e.target.value.trim() || TEAM_DEFAULT[+e.target.dataset.team]; save(); renderBoard(); }
+});
+document.addEventListener("change", e => {
+  if (e.target.dataset.time) { state.times[e.target.dataset.time] = +e.target.value; save(); render(); }
+});
+document.addEventListener("keydown", e => {
+  if (!sb.hidden) { if (e.key === "Escape") { e.preventDefault(); closeSandbox(); } return; }
+  if (e.target.matches("input, select, textarea")) return;
+  if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); go(state.i + 1); }
+  else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(state.i - 1); }
+  else if (e.key === " ") { e.preventDefault(); toggleTimer(); }
+  else if (e.key === "Enter") { e.preventDefault(); reveal(); }
+  else if (/^Digit[1-4]$/.test(e.code)) { e.preventDefault(); addPoint(+e.code.slice(5) - 1, e.shiftKey ? -1 : 1); }
+});
+
+$("sound-btn").addEventListener("click", () => { state.sound = !state.sound; save(); syncTools(); if (state.sound) { unlockAudio(); beep(660, 0.08); } });
+$("theme-btn").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+});
+$("full-btn").addEventListener("click", () => {
+  try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {}
+});
+function syncTools() { $("sound-btn").setAttribute("aria-pressed", String(state.sound)); $("sound-btn").textContent = state.sound ? "Звук увімк." : "Звук вимк."; }
+
+function start(snap) {
+  load();
+  if (snap && snap.state) state = snap.state;
+  fixIndex();
+  syncTools(); resetTimer(); render();
+}
+window.claude?.hot?.snapshot?.(() => ({ state }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+
+</body></html>
